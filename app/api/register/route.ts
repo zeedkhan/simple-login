@@ -3,15 +3,18 @@ import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { createUserSchema } from "@/lib/user-schema";
 import { ZodError } from "zod";
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
   try {
+
     const { name, email, password } = createUserSchema.parse(await req.json());
 
     const hashed_password = await hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
+        id: uuidv4(),
         name,
         email: email.toLowerCase(),
         password: hashed_password,

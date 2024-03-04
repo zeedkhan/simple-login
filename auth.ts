@@ -2,19 +2,27 @@ import NextAuth from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import prisma from './prisma/prisma';
 import github from 'next-auth/providers/github';
-import google from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
+import spotify from 'next-auth/providers/spotify';
+import { LOGIN_URL as SpotifyLoginURL, refreshAccessToken } from "@/lib/spotify";
+
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
+  secret: process.env.AUTH_SECRET,
+  //@ts-ignore
   adapter: PrismaAdapter(prisma),
   pages: {
     signIn: '/login',
   },
   providers: [
     github,
-    google,
+    spotify({
+      clientId: process.env.SPOTIFY_CLIENT as string,
+      clientSecret: process.env.SPOTIFY_SECRET as string, 
+      authorization: SpotifyLoginURL, 
+    }),
     CredentialsProvider({
       name: 'Sign in',
       id: 'credentials',
@@ -27,6 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log(credentials)
         if (!credentials?.email || !credentials.password) {
           return null;
         }
@@ -68,26 +77,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    jwt: ({ token, user }) => {
-      if (user) {
-        const u = user as unknown as any;
+    async jwt({ token, account, user }) {
+      if (account && user) {
         return {
           ...token,
-          id: u.id,
-          randomKey: u.randomKey,
-        };
-      }
-      return token;
-    },
-    session(params) {
-      return {
-        ...params.session,
-        user: {
-          ...params.session.user,
-          id: params.token.id as string,
-          randomKey: params.token.randomKey,
-        },
+          id: account.providerAccountId as string,
+          access_token: account.access_token as string,
+          refresh_token: account.refresh_token as string,
+          expires_at: account.expires_at as number * 1000,
+        }
       };
+
+      if (Date.now() < Number(token.expires_at)) {
+        console.log("Existing acees token is valid")
+        return token;
+      }
+      if (account?.provider === 'spotify') {
+        return await refreshAccessToken(token);
+      }
+      return {
+        ...token,
+      };
+    },
+    //@ts-ignore
+    async session({ session, token }: { session: UserSession; token: Token }): Promise<UserSession> {
+      session.user.token = token;
+      return session;
     },
   },
 });

@@ -1,13 +1,17 @@
+import { auth } from '@/auth';
 import Header from '@/components/header';
 
-export default function Home() {
+
+export default async function Home() {
+  const session = await auth();
+
   return (
     <>
       <Header />
       <section className='bg-ct-blue-600 min-h-screen pt-20'>
         <div className='max-w-4xl mx-auto bg-ct-dark-100 rounded-md h-[20rem] flex justify-center items-center'>
           <p className='text-3xl font-semibold'>
-            Implement Authentication with NextAuth in Next.js 14
+            Welcome {session?.user?.name || 'to the app'}
           </p>
         </div>
       </section>
