@@ -56,8 +56,6 @@ export default function Banner() {
         }
 
         setLoadConsent(false)
-
-
     }, []);
 
     const handleAcceptAll = () => {
@@ -112,9 +110,7 @@ export default function Banner() {
         setShowBanner(false);
     }
 
-    if (loadConsent) {
-        return null;
-    }
+
 
     if (!showBanner) {
         const cookies = cookie.get("consentMode");
@@ -133,7 +129,9 @@ export default function Banner() {
     };
 
 
-
+    if (loadConsent) {
+        return null;
+    }
 
     return (
         <div className="h-full w-full">

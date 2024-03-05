@@ -25,7 +25,7 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <GoogleTagManager gtmId="GTM-MLHH8B63" />
-        <Banner />
+        
         
         {session?.user && (
           <Script id="user-gtm">
@@ -39,6 +39,7 @@ export default async function RootLayout({
         )}
       </head>
       <body className={`${inter.className} relative`}>
+        <Banner />
         <SessionProvider session={session}>{children}</SessionProvider>
         <Toaster />
       </body>
