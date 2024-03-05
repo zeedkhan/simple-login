@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { GoogleTagManager } from '@next/third-parties/google'
 import { auth } from "@/auth";
 import Script from "next/script";
+import Banner from "@/components/banner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,8 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <GoogleTagManager gtmId="GTM-MLHH8B63" />
+        <Banner />
+        
         {session?.user && (
           <Script id="user-gtm">
             {`
