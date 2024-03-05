@@ -35,7 +35,7 @@ export default async function RootLayout({
           </Script>
         )}
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} relative`}>
         <SessionProvider session={session}>{children}</SessionProvider>
         <Toaster />
       </body>
